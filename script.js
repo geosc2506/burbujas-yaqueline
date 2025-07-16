@@ -4,6 +4,9 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+// SONIDO DE POP
+const popSound = new Audio("pop.mp3");
+
 const messages = [
   "Eres mi amor eterno, Yaqueline ❤️",
   "Mi corazón es tuyo, Yaqueline 💘",
@@ -21,7 +24,7 @@ class Bubble {
     this.radius = 40 + Math.random() * 30;
     this.x = Math.random() * canvas.width;
     this.y = canvas.height + this.radius;
-    this.speed = 0.3 + Math.random() * 0.8;
+    this.speed = 0.3 + Math.random() * 0.8; // más lento
     this.color = `hsl(${Math.random() * 360}, 100%, 70%)`;
     this.message = messages[Math.floor(Math.random() * messages.length)];
     this.opacity = 1;
@@ -30,7 +33,6 @@ class Bubble {
 
   draw() {
     if (this.opacity <= 0) return;
-
     ctx.beginPath();
     ctx.fillStyle = this.color;
     ctx.globalAlpha = this.opacity * 0.6;
@@ -66,10 +68,12 @@ function createFloatingMessage(x, y, text) {
 }
 
 function drawFloatingMessages() {
+  ctx.font = "18px Arial";
+  ctx.fillStyle = "white";
+  ctx.textAlign = "center";
   floatingMessages.forEach((msg, index) => {
-    ctx.font = "20px Arial";
     ctx.fillStyle = `rgba(255, 255, 255, ${msg.alpha})`;
-    ctx.fillText(msg.text, msg.x - 50, msg.y - msg.dy);
+    ctx.fillText(msg.text, msg.x, msg.y - msg.dy);
     msg.dy += 1;
     msg.alpha -= 0.01;
     if (msg.alpha <= 0) floatingMessages.splice(index, 1);
@@ -105,9 +109,11 @@ canvas.addEventListener("click", e => {
     if (b.isClicked(mx, my) && !b.popped) {
       b.popped = true;
       createFloatingMessage(b.x, b.y, b.message);
+      popSound.currentTime = 0;
+      popSound.play();
     }
   });
 });
 
-createBubbles(30);
+createBubbles(15); // menos burbujas para mejor visibilidad
 animate();
