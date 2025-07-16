@@ -10,10 +10,11 @@ const messages = [
   "Iluminas mi alma, Yaqueline ✨",
   "Eres mi universo, Yaqueline 🌌",
   "Te amo sin fin, Yaqueline 😘",
-  "Contigo, todo es un sueño 🌹 Yaqueline",
+  "Contigo, todo es un sueño 🌹",
   "Eres mi destino, Yaqueline 💫"
 ];
 
+const floatingMessages = [];
 
 class Bubble {
   constructor() {
@@ -23,19 +24,27 @@ class Bubble {
     this.speed = 1 + Math.random() * 2;
     this.color = `hsl(${Math.random() * 360}, 100%, 70%)`;
     this.message = messages[Math.floor(Math.random() * messages.length)];
+    this.opacity = 1;
+    this.popped = false;
   }
 
   draw() {
+    if (this.opacity <= 0) return;
+
     ctx.beginPath();
     ctx.fillStyle = this.color;
-    ctx.globalAlpha = 0.6;
+    ctx.globalAlpha = this.opacity * 0.6;
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
     ctx.fill();
     ctx.globalAlpha = 1;
   }
 
   update() {
-    this.y -= this.speed;
+    if (!this.popped) {
+      this.y -= this.speed;
+    } else {
+      this.opacity -= 0.05;
+    }
     this.draw();
   }
 
@@ -44,6 +53,27 @@ class Bubble {
     const dy = my - this.y;
     return Math.sqrt(dx * dx + dy * dy) < this.radius;
   }
+}
+
+function createFloatingMessage(x, y, text) {
+  floatingMessages.push({
+    x,
+    y,
+    text,
+    alpha: 1,
+    dy: 0
+  });
+}
+
+function drawFloatingMessages() {
+  floatingMessages.forEach((msg, index) => {
+    ctx.font = "20px Arial";
+    ctx.fillStyle = `rgba(255, 255, 255, ${msg.alpha})`;
+    ctx.fillText(msg.text, msg.x - 50, msg.y - msg.dy);
+    msg.dy += 1;
+    msg.alpha -= 0.01;
+    if (msg.alpha <= 0) floatingMessages.splice(index, 1);
+  });
 }
 
 let bubbles = [];
@@ -56,7 +86,13 @@ function createBubbles(num) {
 
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  bubbles.forEach(b => b.update());
+  bubbles.forEach((b, i) => {
+    b.update();
+    if (b.opacity <= 0) {
+      bubbles.splice(i, 1);
+    }
+  });
+  drawFloatingMessages();
   requestAnimationFrame(animate);
 }
 
@@ -65,13 +101,13 @@ canvas.addEventListener("click", e => {
   const mx = e.clientX - rect.left;
   const my = e.clientY - rect.top;
 
-  bubbles.forEach((b, index) => {
-    if (b.isClicked(mx, my)) {
-      alert(b.message);
-      bubbles.splice(index, 1);
+  bubbles.forEach(b => {
+    if (b.isClicked(mx, my) && !b.popped) {
+      b.popped = true;
+      createFloatingMessage(b.x, b.y, b.message);
     }
   });
 });
 
-createBubbles(25);
+createBubbles(30);
 animate();
