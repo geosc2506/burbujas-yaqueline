@@ -21,7 +21,7 @@ class Bubble {
     this.radius = 40 + Math.random() * 30;
     this.x = Math.random() * canvas.width;
     this.y = canvas.height + this.radius;
-    this.speed = 1 + Math.random() * 2;
+    this.speed = 0.3 + Math.random() * 0.8;
     this.color = `hsl(${Math.random() * 360}, 100%, 70%)`;
     this.message = messages[Math.floor(Math.random() * messages.length)];
     this.opacity = 1;
